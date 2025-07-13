@@ -1,18 +1,15 @@
 using System.ComponentModel.DataAnnotations;
+using TestTask1.Domain.Entities.Base;
 
 namespace TestTask1.Domain.Entities;
 
-public class TaskListUser
+public record TaskListUser : EntityBase
 {
-    public int Id { get; init; }
-    
     [Required]
     public int TaskListId { get; init; }
     
     [Required]
     public required string UserId { get; init; } 
-    
-    public DateTime CreatedAt { get; init; }
     
     public TaskList? TaskList { get; init; }
 } 

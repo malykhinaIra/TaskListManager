@@ -1,4 +1,6 @@
-using TestTask1.Application.DTOs;
+using AutoMapper;
+using TestTask1.Application.DataTransferObjects.Requests;
+using TestTask1.Application.DataTransferObjects.Responses;
 using TestTask1.Domain.Entities;
 using TestTask1.Domain.Interfaces;
 
@@ -8,14 +10,16 @@ public class TaskListService : ITaskListService
 {
     private readonly ITaskListRepository _taskListRepository;
     private readonly ITaskListUserRepository _taskListUserRepository;
+    private readonly IMapper _mapper;
 
-    public TaskListService(ITaskListRepository taskListRepository, ITaskListUserRepository taskListUserRepository)
+    public TaskListService(ITaskListRepository taskListRepository, ITaskListUserRepository taskListUserRepository, IMapper mapper)
     {
         _taskListRepository = taskListRepository;
         _taskListUserRepository = taskListUserRepository;
+        _mapper = mapper;
     }
 
-    public async Task<TaskListDto?> GetTaskListAsync(int id, string userId)
+    public async Task<TaskListResponse?> GetTaskListAsync(int id, string userId)
     {
         var hasAccess = await _taskListRepository.HasAccessToTaskListAsync(id, userId);
         if (!hasAccess)
@@ -29,21 +33,18 @@ public class TaskListService : ITaskListService
             return null;
         }
 
-        return MapToDto(taskList);
+        var taskListEntity = _mapper.Map<TaskList>(taskList);
+        return _mapper.Map<TaskListResponse>(taskListEntity);
     }
 
-    public async Task<PaginatedResult<TaskListSummaryDto>> GetTaskListsAsync(string userId, int page = 1, int pageSize = 10)
+    public async Task<PaginatedResponse<TaskListSummaryResponse>> GetTaskListsAsync(string userId, int page = 1, int pageSize = 10)
     {
         var (taskLists, totalCount) = await _taskListRepository.GetTaskListsForUserAsync(userId, page, pageSize);
         
-        var items = taskLists.Select(tl => new TaskListSummaryDto
-        {
-            Id = tl.Id,
-            Name = tl.Name,
-            CreatedAt = tl.CreatedAt
-        }).ToList();
+        var taskListEntities = _mapper.Map<List<TaskList>>(taskLists);
+        var items = _mapper.Map<List<TaskListSummaryResponse>>(taskListEntities);
 
-        return new PaginatedResult<TaskListSummaryDto>
+        return new PaginatedResponse<TaskListSummaryResponse>
         {
             Items = items,
             TotalCount = totalCount,
@@ -52,20 +53,20 @@ public class TaskListService : ITaskListService
         };
     }
 
-    public async Task<TaskListDto> CreateTaskListAsync(CreateTaskListDto createTaskListDto, string userId)
+    public async Task<TaskListResponse> CreateTaskListAsync(CreateTaskListRequest request, string userId)
     {
-        var taskList = new TaskList
-        {
-            Name = createTaskListDto.Name,
-            OwnerId = userId,
-            CreatedAt = DateTime.UtcNow
-        };
-
+        var taskListEntity = _mapper.Map<TaskList>(request);
+        
+        taskListEntity = taskListEntity with { OwnerId = userId };
+        
+        var taskList = _mapper.Map<TaskList>(taskListEntity);
         var createdTaskList = await _taskListRepository.CreateAsync(taskList);
-        return MapToDto(createdTaskList);
+        var createdEntity = _mapper.Map<TaskList>(createdTaskList);
+        
+        return _mapper.Map<TaskListResponse>(createdEntity);
     }
 
-    public async Task<TaskListDto?> UpdateTaskListAsync(int id, UpdateTaskListDto updateTaskListDto, string userId)
+    public async Task<TaskListResponse?> UpdateTaskListAsync(int id, UpdateTaskListRequest request, string userId)
     {
         var hasAccess = await _taskListRepository.HasAccessToTaskListAsync(id, userId);
         if (!hasAccess)
@@ -79,11 +80,15 @@ public class TaskListService : ITaskListService
             return null;
         }
 
-        taskList.Name = updateTaskListDto.Name;
-        taskList.JustUpdated();
+        var taskListEntity = _mapper.Map<TaskList>(taskList);
+        var updatedEntity = _mapper.Map(request, taskListEntity);
+        var updatedTaskList = _mapper.Map<TaskList>(updatedEntity);
+        
+        updatedTaskList.UpdatedAt = DateTime.UtcNow;
 
-        var updatedTaskList = await _taskListRepository.UpdateAsync(taskList);
-        return MapToDto(updatedTaskList);
+        var result = await _taskListRepository.UpdateAsync(updatedTaskList);
+        var resultEntity = _mapper.Map<TaskList>(result);
+        return _mapper.Map<TaskListResponse>(resultEntity);
     }
 
     public async Task<bool> DeleteTaskListAsync(int id, string userId)
@@ -97,7 +102,7 @@ public class TaskListService : ITaskListService
         return await _taskListRepository.DeleteAsync(id);
     }
 
-    public async Task<bool> AddUserToTaskListAsync(int taskListId, AddTaskListUserDto addTaskListUserDto, string requestUserId)
+    public async Task<bool> AddUserToTaskListAsync(int taskListId, AddUserToTaskListRequest request, string requestUserId)
     {
         var hasAccess = await _taskListRepository.HasAccessToTaskListAsync(taskListId, requestUserId);
         if (!hasAccess)
@@ -111,24 +116,32 @@ public class TaskListService : ITaskListService
             return false;
         }
 
-        var existingRelation = await _taskListUserRepository.ExistsAsync(taskListId, addTaskListUserDto.UserId);
+        if (string.IsNullOrWhiteSpace(request.UserId))
+        {
+            return false;
+        }
+
+        if (request.UserId == requestUserId)
+        {
+            return false;
+        }
+
+        var existingRelation = await _taskListUserRepository.ExistsAsync(taskListId, request.UserId);
         if (existingRelation)
         {
             return false;
         }
 
-        var taskListUser = new TaskListUser
-        {
-            TaskListId = taskListId,
-            UserId = addTaskListUserDto.UserId,
-            CreatedAt = DateTime.UtcNow
-        };
+        var taskListUserEntity = _mapper.Map<TaskListUser>(request);
+        taskListUserEntity = taskListUserEntity with { TaskListId = taskListId };
+        
+        var taskListUser = _mapper.Map<TaskListUser>(taskListUserEntity);
 
         await _taskListUserRepository.AddAsync(taskListUser);
         return true;
     }
 
-    public async Task<List<TaskListUserDto>> GetTaskListUsersAsync(int taskListId, string userId)
+    public async Task<List<TaskListUserResponse>> GetTaskListUsersAsync(int taskListId, string userId)
     {
         var hasAccess = await _taskListRepository.HasAccessToTaskListAsync(taskListId, userId);
         if (!hasAccess)
@@ -137,12 +150,8 @@ public class TaskListService : ITaskListService
         }
 
         var taskListUsers = await _taskListUserRepository.GetTaskListUsersAsync(taskListId);
-        return taskListUsers.Select(tlu => new TaskListUserDto
-        {
-            Id = tlu.Id,
-            UserId = tlu.UserId,
-            CreatedAt = tlu.CreatedAt
-        }).ToList();
+        var taskListUserEntities = _mapper.Map<List<TaskListUser>>(taskListUsers);
+        return _mapper.Map<List<TaskListUserResponse>>(taskListUserEntities);
     }
 
     public async Task<bool> RemoveUserFromTaskListAsync(int taskListId, string userIdToRemove, string requestUserId)
@@ -156,15 +165,5 @@ public class TaskListService : ITaskListService
         return await _taskListUserRepository.RemoveAsync(taskListId, userIdToRemove);
     }
 
-    private static TaskListDto MapToDto(TaskList taskList)
-    {
-        return new TaskListDto
-        {
-            Id = taskList.Id,
-            Name = taskList.Name,
-            OwnerId = taskList.OwnerId,
-            CreatedAt = taskList.CreatedAt,
-            UpdatedAt = taskList.UpdatedAt
-        };
-    }
+
 } 

@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
-using TestTask1.Infrastructure.Data;
 
 #nullable disable
 
@@ -16,7 +14,7 @@ namespace TestTask1.Infrastructure.Data.Migrations
                 .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            modelBuilder.Entity("TestTask1.Domain.Entities.TaskList", b =>
+            modelBuilder.Entity("TestTask1.Infrastructure.Data.Models.TaskListModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -43,10 +41,12 @@ namespace TestTask1.Infrastructure.Data.Migrations
 
                     b.HasIndex("OwnerId");
 
+                    b.HasIndex("OwnerId", "CreatedAt");
+
                     b.ToTable("TaskLists");
                 });
 
-            modelBuilder.Entity("TestTask1.Domain.Entities.TaskListUser", b =>
+            modelBuilder.Entity("TestTask1.Infrastructure.Data.Models.TaskListUserModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -67,12 +67,18 @@ namespace TestTask1.Infrastructure.Data.Migrations
                     b.HasIndex("TaskListId", "UserId")
                         .IsUnique();
 
+                    b.HasIndex("TaskListId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("CreatedAt");
+
                     b.ToTable("TaskListUsers");
                 });
 
-            modelBuilder.Entity("TestTask1.Domain.Entities.TaskListUser", b =>
+            modelBuilder.Entity("TestTask1.Infrastructure.Data.Models.TaskListUserModel", b =>
                 {
-                    b.HasOne("TestTask1.Domain.Entities.TaskList", "TaskList")
+                    b.HasOne("TestTask1.Infrastructure.Data.Models.TaskListModel", "TaskList")
                         .WithMany("TaskListUsers")
                         .HasForeignKey("TaskListId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -81,7 +87,7 @@ namespace TestTask1.Infrastructure.Data.Migrations
                     b.Navigation("TaskList");
                 });
 
-            modelBuilder.Entity("TestTask1.Domain.Entities.TaskList", b =>
+            modelBuilder.Entity("TestTask1.Infrastructure.Data.Models.TaskListModel", b =>
                 {
                     b.Navigation("TaskListUsers");
                 });

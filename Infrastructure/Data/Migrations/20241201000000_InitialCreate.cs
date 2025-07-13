@@ -53,6 +53,21 @@ namespace TestTask1.Infrastructure.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_TaskListUsers_TaskListId",
+                table: "TaskListUsers",
+                column: "TaskListId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TaskListUsers_UserId",
+                table: "TaskListUsers",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TaskListUsers_CreatedAt",
+                table: "TaskListUsers",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TaskLists_CreatedAt",
                 table: "TaskLists",
                 column: "CreatedAt");
@@ -61,10 +76,31 @@ namespace TestTask1.Infrastructure.Data.Migrations
                 name: "IX_TaskLists_OwnerId",
                 table: "TaskLists",
                 column: "OwnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TaskLists_OwnerId_CreatedAt",
+                table: "TaskLists",
+                columns: new[] { "OwnerId", "CreatedAt" });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropIndex(
+                name: "IX_TaskLists_OwnerId_CreatedAt",
+                table: "TaskLists");
+
+            migrationBuilder.DropIndex(
+                name: "IX_TaskListUsers_CreatedAt",
+                table: "TaskListUsers");
+
+            migrationBuilder.DropIndex(
+                name: "IX_TaskListUsers_UserId",
+                table: "TaskListUsers");
+
+            migrationBuilder.DropIndex(
+                name: "IX_TaskListUsers_TaskListId",
+                table: "TaskListUsers");
+
             migrationBuilder.DropTable(
                 name: "TaskListUsers");
 

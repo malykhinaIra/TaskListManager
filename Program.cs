@@ -3,6 +3,7 @@ using TestTask1.Infrastructure.Data;
 using TestTask1.Domain.Interfaces;
 using TestTask1.Infrastructure.Repositories;
 using TestTask1.Application.Services;
+using TestTask1.Application.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,8 @@ builder.Services.AddScoped<ITaskListRepository, TaskListRepository>();
 builder.Services.AddScoped<ITaskListUserRepository, TaskListUserRepository>();
 
 builder.Services.AddScoped<ITaskListService, TaskListService>();
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 var app = builder.Build();
 

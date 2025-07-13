@@ -1,0 +1,20 @@
+# This is a generated file. Not intended for manual editing.
+services:
+  testtask1:
+    build:
+      context: "D:\\test-assessment\\TestTask1"
+      dockerfile: "Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net8.0/TestTask1.dll"
+    environment:
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "testtask1:dev"
+    ports: []
+    volumes:
+    - "C:\\Users\\maksm\\.nuget\\packages:/home/app/.nuget/packages"
+    - "D:\\test-assessment\\TestTask1:/app:rw"
+    - "D:\\test-assessment\\TestTask1:/src:rw"
+    working_dir: "/app"
