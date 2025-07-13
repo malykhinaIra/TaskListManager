@@ -1,7 +1,7 @@
 using TestTask1.Application.DataTransferObjects.Requests;
 using TestTask1.Application.DataTransferObjects.Responses;
 
-namespace TestTask1.Application.Services;
+namespace TestTask1.Application.Services.Interfaces;
 
 public interface ITaskListService
 {

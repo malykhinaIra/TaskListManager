@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TestTask1.Application.DataTransferObjects.Requests;
 using TestTask1.Application.Services;
+using TestTask1.Application.Services.Interfaces;
 
 namespace TestTask1.API.Controllers;
 

@@ -4,6 +4,7 @@ using TestTask1.Domain.Interfaces;
 using TestTask1.Infrastructure.Repositories;
 using TestTask1.Application.Services;
 using TestTask1.Application.Mapping;
+using TestTask1.Application.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,6 +1,6 @@
 using TestTask1.Application.DataTransferObjects.Requests;
 
-namespace TestTask1.Application.Services;
+namespace TestTask1.Application.Services.Interfaces;
 
 public interface IUserService
 {

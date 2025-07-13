@@ -1,6 +1,7 @@
 using AutoMapper;
 using TestTask1.Application.DataTransferObjects.Requests;
 using TestTask1.Application.DataTransferObjects.Responses;
+using TestTask1.Application.Services.Interfaces;
 using TestTask1.Domain.Entities;
 using TestTask1.Domain.Interfaces;
 
