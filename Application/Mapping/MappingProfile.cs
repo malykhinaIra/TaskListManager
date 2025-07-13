@@ -10,30 +10,20 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        CreateMap<TaskList, TaskListModel>();
         CreateMap<TaskListModel, TaskList>();
-        CreateMap<TaskListUser, TaskListUserModel>();
-        CreateMap<TaskListUserModel, TaskListUser>();
-
-        CreateMap<CreateTaskListRequest, TaskList>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
-            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
-            .ForMember(dest => dest.TaskListUsers, opt => opt.MapFrom(src => new List<TaskListUser>()));
-        
-        CreateMap<UpdateTaskListRequest, TaskList>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.OwnerId, opt => opt.Ignore())
-            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
-            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
-            .ForMember(dest => dest.TaskListUsers, opt => opt.Ignore());
-
-        CreateMap<AddUserToTaskListRequest, TaskListUser>()
-            .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
-
+        CreateMap<TaskList, TaskListModel>();
+        CreateMap<CreateTaskListRequest, TaskList>();
         CreateMap<TaskList, TaskListResponse>();
         CreateMap<TaskList, TaskListSummaryResponse>();
+        CreateMap<UpdateTaskListRequest, TaskList>();
+
+        CreateMap<TaskListUserModel, TaskListUser>();
+        CreateMap<TaskListUser, TaskListUserModel>();
+        CreateMap<AddUserToTaskListRequest, TaskListUser>();
         CreateMap<TaskListUser, TaskListUserResponse>();
+
+        CreateMap<UserModel, User>();
+        CreateMap<User, UserModel>();
+        CreateMap<CreateUserRequest, User>();
     }
 } 

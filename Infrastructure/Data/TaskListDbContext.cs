@@ -11,6 +11,7 @@ public class TaskListDbContext : DbContext
 
     public DbSet<TaskListModel> TaskLists { get; set; }
     public DbSet<TaskListUserModel> TaskListUsers { get; set; }
+    public DbSet<UserModel> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -21,5 +22,9 @@ public class TaskListDbContext : DbContext
             .WithOne(model => model.TaskList)
             .HasForeignKey(model => model.TaskListId)
             .OnDelete(DeleteBehavior.Cascade);
+            
+        modelBuilder.Entity<UserModel>()
+            .HasIndex(u => u.UserId)
+            .IsUnique();
     }
 } 

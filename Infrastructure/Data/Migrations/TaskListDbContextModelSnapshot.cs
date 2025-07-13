@@ -76,6 +76,33 @@ namespace TestTask1.Infrastructure.Data.Migrations
                     b.ToTable("TaskListUsers");
                 });
 
+            modelBuilder.Entity("TestTask1.Infrastructure.Data.Models.UserModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("TestTask1.Infrastructure.Data.Models.TaskListUserModel", b =>
                 {
                     b.HasOne("TestTask1.Infrastructure.Data.Models.TaskListModel", "TaskList")

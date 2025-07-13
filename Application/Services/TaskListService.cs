@@ -10,17 +10,24 @@ public class TaskListService : ITaskListService
 {
     private readonly ITaskListRepository _taskListRepository;
     private readonly ITaskListUserRepository _taskListUserRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
 
-    public TaskListService(ITaskListRepository taskListRepository, ITaskListUserRepository taskListUserRepository, IMapper mapper)
+    public TaskListService(ITaskListRepository taskListRepository, ITaskListUserRepository taskListUserRepository, IUserRepository userRepository, IMapper mapper)
     {
         _taskListRepository = taskListRepository;
         _taskListUserRepository = taskListUserRepository;
+        _userRepository = userRepository;
         _mapper = mapper;
     }
 
     public async Task<TaskListResponse?> GetTaskListAsync(int id, string userId)
     {
+        if (!await _userRepository.ExistsAsync(userId))
+        {
+            return null;
+        }
+
         var hasAccess = await _taskListRepository.HasAccessToTaskListAsync(id, userId);
         if (!hasAccess)
         {
@@ -39,6 +46,17 @@ public class TaskListService : ITaskListService
 
     public async Task<PaginatedResponse<TaskListSummaryResponse>> GetTaskListsAsync(string userId, int page = 1, int pageSize = 10)
     {
+        if (!await _userRepository.ExistsAsync(userId))
+        {
+            return new PaginatedResponse<TaskListSummaryResponse>
+            {
+                Items = [],
+                TotalCount = 0,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
         var (taskLists, totalCount) = await _taskListRepository.GetTaskListsForUserAsync(userId, page, pageSize);
         
         var taskListEntities = _mapper.Map<List<TaskList>>(taskLists);
@@ -55,6 +73,11 @@ public class TaskListService : ITaskListService
 
     public async Task<TaskListResponse> CreateTaskListAsync(CreateTaskListRequest request, string userId)
     {
+        if (!await _userRepository.ExistsAsync(userId))
+        {
+            throw new InvalidOperationException("User does not exist");
+        }
+
         var taskListEntity = _mapper.Map<TaskList>(request);
         
         taskListEntity = taskListEntity with { OwnerId = userId };
@@ -68,6 +91,11 @@ public class TaskListService : ITaskListService
 
     public async Task<TaskListResponse?> UpdateTaskListAsync(int id, UpdateTaskListRequest request, string userId)
     {
+        if (!await _userRepository.ExistsAsync(userId))
+        {
+            return null;
+        }
+
         var hasAccess = await _taskListRepository.HasAccessToTaskListAsync(id, userId);
         if (!hasAccess)
         {
@@ -93,6 +121,11 @@ public class TaskListService : ITaskListService
 
     public async Task<bool> DeleteTaskListAsync(int id, string userId)
     {
+        if (!await _userRepository.ExistsAsync(userId))
+        {
+            return false;
+        }
+
         var isOwner = await _taskListRepository.IsOwnerAsync(id, userId);
         if (!isOwner)
         {
@@ -104,6 +137,11 @@ public class TaskListService : ITaskListService
 
     public async Task<bool> AddUserToTaskListAsync(int taskListId, AddUserToTaskListRequest request, string requestUserId)
     {
+        if (!await _userRepository.ExistsAsync(requestUserId) || !await _userRepository.ExistsAsync(request.UserId))
+        {
+            return false;
+        }
+
         var hasAccess = await _taskListRepository.HasAccessToTaskListAsync(taskListId, requestUserId);
         if (!hasAccess)
         {
@@ -143,6 +181,11 @@ public class TaskListService : ITaskListService
 
     public async Task<List<TaskListUserResponse>> GetTaskListUsersAsync(int taskListId, string userId)
     {
+        if (!await _userRepository.ExistsAsync(userId))
+        {
+            return [];
+        }
+
         var hasAccess = await _taskListRepository.HasAccessToTaskListAsync(taskListId, userId);
         if (!hasAccess)
         {
@@ -156,6 +199,11 @@ public class TaskListService : ITaskListService
 
     public async Task<bool> RemoveUserFromTaskListAsync(int taskListId, string userIdToRemove, string requestUserId)
     {
+        if (!await _userRepository.ExistsAsync(requestUserId) || !await _userRepository.ExistsAsync(userIdToRemove))
+        {
+            return false;
+        }
+
         var hasAccess = await _taskListRepository.HasAccessToTaskListAsync(taskListId, requestUserId);
         if (!hasAccess)
         {
@@ -164,6 +212,4 @@ public class TaskListService : ITaskListService
 
         return await _taskListUserRepository.RemoveAsync(taskListId, userIdToRemove);
     }
-
-
 } 
