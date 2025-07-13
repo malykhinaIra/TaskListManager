@@ -1,0 +1,35 @@
+﻿services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: tasklist_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  testtask1:
+    image: testtask1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5017:8080"
+    depends_on:
+      - postgres
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=tasklist_db;Username=postgres;Password=postgres;Port=5432
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge
