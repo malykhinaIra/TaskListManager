@@ -1,0 +1,62 @@
+@homeUrl = http://localhost:5017
+
+### Create Users
+POST {{homeUrl}}/api/users
+Content-Type: application/json
+
+{
+  "userId": "user1",
+  "name": "John Doe"
+}
+
+### Create another user
+POST {{homeUrl}}/api/users
+Content-Type: application/json
+
+{
+  "userId": "user2",
+  "name": "Jane Smith"
+}
+
+### Create Task List
+POST {{homeUrl}}/api/tasklists
+Content-Type: application/json
+X-User-Id: user1
+
+{
+  "name": "My Task List"
+}
+
+### Create Task List
+POST {{homeUrl}}/api/tasklists
+Content-Type: application/json
+X-User-Id: invaliduser
+
+{
+  "name": "My Task List"
+}
+
+### Get Task Lists
+GET {{homeUrl}}/api/tasklists?page=1&pageSize=10
+X-User-Id: user1
+
+### Get Task Lists
+GET {{homeUrl}}/api/tasklists?page=1&pageSize=10
+X-User-Id: invaliduser
+
+### Add user to task list
+POST {{homeUrl}}/api/tasklists/1/users
+Content-Type: application/json
+X-User-Id: user1
+
+{
+  "userId": "user2"
+}
+
+### Get task list users
+GET {{homeUrl}}/api/tasklists/1/users
+X-User-Id: user1
+
+### Remove user from task list
+DELETE {{homeUrl}}/api/tasklists/1/users/user2
+X-User-Id: user1
